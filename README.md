@@ -50,7 +50,14 @@
 
 **前提**：Zotero 7 / 8 / 9（[zotero.org/download](https://www.zotero.org/download/)）。Windows、macOS、Linux 都行。
 
-1. 下载 [`bilingual-reader_1.4.1.xpi`](../../releases/latest)（在本仓库 Releases 里）
+**下载地址（二选一）**：
+
+| | 地址 | 说明 |
+| --- | --- | --- |
+| 主 | [Releases 里的 xpi](../../releases/latest) | 官方 Release 附件 |
+| 备用 | [jsDelivr 镜像](https://cdn.jsdelivr.net/gh/ChanceZhangcr/zotero-bilingual-reader@main/releases/bilingual-reader_1.4.1.xpi) | 直连 GitHub 不稳时用这个 |
+
+1. 下载 `bilingual-reader_1.4.1.xpi`
 2. Zotero → 菜单 **工具 → 插件**（macOS：Zotero → 设置 → 插件）
 3. 点插件面板右上角的 **齿轮** → **Install Add-on From File…**（从文件安装插件）
 4. 选中那个 `.xpi` → 确认 → **重启 Zotero**

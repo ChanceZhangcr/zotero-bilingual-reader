@@ -20,7 +20,7 @@
  */
 
 import { execFileSync, spawnSync } from "node:child_process";
-import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { tmpdir } from "node:os";
@@ -146,6 +146,15 @@ const xpiAbs = join(ROOT, "build", `bilingual-reader_${version}.xpi`);
   }
   if (!existsSync(xpiAbs)) throw new Error(`构建后找不到 ${xpiRel}`);
   ok(`${xpiRel}（${(readFileSync(xpiAbs).length / 1024).toFixed(1)} KB）`);
+
+  // 仓库里再放一份副本：GitHub Release 的下载要经过 objects.githubusercontent.com，
+  // 国内偶尔会被掐断（实测 4 次里挂 1 次）。jsDelivr 能直接读仓库文件，
+  // 于是给朋友一条国内可用的备用下载地址。
+  const mirrorDir = join(ROOT, "releases");
+  if (!existsSync(mirrorDir)) mkdirSync(mirrorDir, { recursive: true });
+  const mirrorAbs = join(mirrorDir, `bilingual-reader_${version}.xpi`);
+  writeFileSync(mirrorAbs, readFileSync(xpiAbs));
+  ok(`镜像副本 → releases/bilingual-reader_${version}.xpi`);
 }
 
 /* ---------------------------- 4. git 身份 ---------------------------- */
