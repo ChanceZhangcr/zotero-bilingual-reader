@@ -4,9 +4,9 @@
 
 **一键把英文论文翻成中文，左英文右中文对照读，还能导出「中文版 + 中英对照版」PDF。**
 
-![version](https://img.shields.io/badge/version-1.4.1-407bd2)
-![platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-4c8bf5)
-![zotero](https://img.shields.io/badge/Zotero-7%20%7C%208%20%7C%209-b31b1b)
+![version](https://img.shields.io/badge/version-1.4.2-407bd2)
+![platform](https://img.shields.io/badge/platform-Windows%2010%20%2F%2011-4c8bf5)
+![zotero](https://img.shields.io/badge/Zotero-9-b31b1b)
 ![engines](https://img.shields.io/badge/%E5%85%8D%E8%B4%B9%E5%BC%95%E6%93%8E-4%20%E4%B8%AA-2ea44f)
 ![license](https://img.shields.io/badge/license-MIT-6f42c1)
 
@@ -15,6 +15,19 @@
 [安装](#安装) · [使用](#使用) · [翻译引擎](#翻译引擎) · [导出文档](#导出文档) · [常见问题](#常见问题)
 
 </div>
+
+---
+
+## 这个插件是两个人一起做的
+
+| | 做了什么 |
+| --- | --- |
+| **ChanceZhangcr** | 提需求、真机试用、把每一个问题原样反馈回来（"点按钮没反应""悬浮按钮没了""导出失败""要点好几下才弹出来"），决定做什么、不做什么，最后拍板验收 |
+| **DeepSeek**（AI 编程助手） | 写代码、查 Zotero 9 内部实现、调 bug、做字体子集化与 PDF 写出、写测试和这份文档 |
+
+没有第一列那些具体到"点了没反应"的反馈，这个东西做不出来 —— 大部分 bug 都是靠"哪一步没反应"这句话定位的。
+第二列负责查证和实现：比如「悬浮按钮一直不显示」的真正原因是漏写了一个函数、异常被 try/catch 吞掉，日志里一个字都没有。
+
 
 ---
 
@@ -48,17 +61,18 @@
 
 ## 安装
 
-**前提**：Zotero 7 / 8 / 9（[zotero.org/download](https://www.zotero.org/download/)）。Windows、macOS、Linux 都行。
+**前提：Zotero 9 + Windows 10/11。** 开发和实测都在 **Zotero 9.0.5 / Windows** 上做的，别处没验证过 ——
+Zotero 7、8 会直接提示「不兼容」（`strict_min_version` 设成了 9.0）。
 
 **下载地址（二选一）**：
 
 | | 地址 | 说明 |
 | --- | --- | --- |
 | 主 | [Releases 里的 xpi](../../releases/latest) | 官方 Release 附件 |
-| 备用 | [jsDelivr 镜像](https://cdn.jsdelivr.net/gh/ChanceZhangcr/zotero-bilingual-reader@main/releases/bilingual-reader_1.4.1.xpi) | 直连 GitHub 不稳时用这个 |
+| 备用 | [jsDelivr 镜像](https://cdn.jsdelivr.net/gh/ChanceZhangcr/zotero-bilingual-reader@main/releases/bilingual-reader_1.4.2.xpi) | 直连 GitHub 不稳时用这个 |
 
-1. 下载 `bilingual-reader_1.4.1.xpi`
-2. Zotero → 菜单 **工具 → 插件**（macOS：Zotero → 设置 → 插件）
+1. 下载 `bilingual-reader_1.4.2.xpi`
+2. Zotero → 菜单 **工具 → 插件**
 3. 点插件面板右上角的 **齿轮** → **Install Add-on From File…**（从文件安装插件）
 4. 选中那个 `.xpi` → 确认 → **重启 Zotero**
 
@@ -67,7 +81,7 @@
 <details>
 <summary>装不上 / 按钮找不到？</summary>
 
-- Zotero 7 以下不支持，会提示「不兼容」
+- Zotero 9 以下不支持，会提示「不兼容」
 - 必须重启 Zotero，插件才会加载
 - 如果装了多个 Zotero（比如 Beta 版和数据目录分开的），注意装到你在用的那个
 </details>
@@ -76,7 +90,7 @@
 
 | 操作 | 怎么做 |
 | --- | --- |
-| 整篇翻译 | 打开 PDF → 点阅读器右上角 **「中译」** → 或按 `Ctrl+Alt+T`（macOS `Cmd+Option+T`） |
+| 整篇翻译 | 打开 PDF → 点阅读器右上角 **「中译」** → 或按 `Ctrl+Alt+T` |
 | 只译一段 | 在 PDF 里划选文字 → 浮出的工具条上点「译」 |
 | 调栏宽 | 拖动译文栏左边缘的分隔线 |
 | 双语 / 仅译文 | 面板上的「双语」按钮 |
@@ -112,7 +126,7 @@
 
 在 **编辑 → 设置 → 双语论文助手 → 导出文档** 里可以改成「只要中文版」或「只要中英对照版」。
 
-字体用的是系统自带中文字体（Windows 仿宋/黑体/微软雅黑，macOS 苹方/宋体），**只嵌入用到的字形**，10 MB 的字体最后只进去几百 KB。TTF 和 TTC（字体集合）都支持。
+字体用的是 Windows 自带中文字体（仿宋/黑体/等线，兜底微软雅黑、宋体），**只嵌入用到的字形**，10 MB 的字体最后只进去几百 KB。TTF 和 TTC（字体集合）都支持。
 
 排版上做了两件容易忽略的事：英文按**单词**边界折行（不会出现 `explain` / `ability` 被劈开），中文避头尾（不会让「，」跑到行首）。
 
@@ -148,13 +162,21 @@
 发这个文件就够了：
 
 ```
-Windows:  C:\Users\<用户名>\Zotero\bilingual-reader\diagnostic.log
-macOS:    ~/Zotero/bilingual-reader/diagnostic.log
-Linux:    ~/Zotero/bilingual-reader/diagnostic.log
+C:\Users\<用户名>\Zotero\bilingual-reader\diagnostic.log
 ```
 
 里面按时间记了每一步做到哪、失败在哪一步、原始错误是什么。
 </details>
+
+## 已知限制
+
+诚实写在这里，免得白折腾：
+
+- **只支持 Zotero 9 + Windows**。Zotero 7/8 装不上（版本号卡住）；macOS / Linux **没测过** —— 代码里留了兜底，不保证能用
+- 免费翻译接口是各家网页版的**公开端点，不是正式 API**，被限流、改协议都很正常；量大了会不稳
+- PDF 导出是**自己画的**（没有用 Zotero 自带的转换），所以排版比较朴素：A4、单栏、页眉带标题和页码，不做原版式的图文重排
+- 译文按段落对照，**不保留原文的字体、图、表格**
+- 划词翻译只给一句话的中文，不保留上下文
 
 ## 隐私
 
@@ -208,18 +230,27 @@ build.mjs             构建脚本（语法检查 → 引用检查 → 打 zip�
 
 ### 发布新版本
 
+一条命令（需要先 `gh auth login` 过一次）：
+
+```bash
+node tools/publish-github.mjs
+```
+
+它会：填好 `update_url` → 构建 xpi → 提交 → 推送 → 发 Release → 更新 jsDelivr 镜像。
+手动做的话是这几步：
+
 1. 改 `src/manifest.json` 的 `version`
 2. `node build.mjs` → 得到 `build/bilingual-reader_x.y.z.xpi`
-3. 顺手把 `src/manifest.json` 里的 `update_url` 改成你仓库的 raw 地址：
-   ```json
-   "update_url": "https://raw.githubusercontent.com/<你的用户名>/<仓库名>/main/update.json"
-   ```
-4. 在 GitHub 建一个 Release，tag 用 `vx.y.z`，把 `.xpi` 传上去
-5. 更新仓库根目录的 `update.json`（模板见仓库里的 `update.json`），Zotero 就会自动提示老用户升级
+3. 在 GitHub 建一个 Release，tag 用 `vx.y.z`，把 `.xpi` 传上去
+4. 把 xpi 再复制到 `releases/` 目录（jsDelivr 镜像走这里）
+5. 更新根目录 `update.json` 里的 `version` 和 `update_link`
+
+> ⚠️ `update_url` **不要**用 `raw.githubusercontent.com` —— 这个域名在国内 DNS 解析失败（实测），
+> 用了之后老用户永远收不到更新提示，而且不会报错。现在用的是 jsDelivr。
 
 ## 许可
 
-[MIT](LICENSE)
+[MIT](LICENSE) · 版权归 **ChanceZhangcr**，代码由 **ChanceZhangcr 与 DeepSeek** 共同完成
 
 ## 免责声明
 

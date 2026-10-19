@@ -1,6 +1,10 @@
 MIT License
 
-Copyright (c) 2026 Bilingual Paper Reader contributors
+Copyright (c) 2026 ChanceZhangcr
+
+This project was built jointly by ChanceZhangcr (product, testing, requirements)
+and DeepSeek (AI pair-programming assistant: implementation, debugging, tests,
+documentation). See AUTHORS.md for details.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

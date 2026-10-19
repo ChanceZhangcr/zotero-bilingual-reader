@@ -355,7 +355,7 @@ body:not(.bilingual-show-source) .bilingual-para .en { display: none !important;
     helpBody.innerHTML = [
       "<b>怎么用</b>",
       "<ol>",
-      "<li><b>整篇翻译</b>：点阅读器右上角的「中译」悬浮按钮，或按 <b>Ctrl+Alt+T</b>（macOS <b>Cmd+Option+T</b>）。</li>",
+      "<li><b>整篇翻译</b>：点阅读器右上角的「中译」悬浮按钮，或按 <b>Ctrl+Alt+T</b>。</li>",
       "<li><b>只译一段</b>：在 PDF 里划选文字，浮出的工具条上点「译」，就地显示中文。</li>",
       "<li><b>调宽度</b>：拖动译文栏左边缘的分隔线。</li>",
       "<li><b>导出文档</b>：生成 PDF 挂到条目下面。默认两个版本 ——「中文译文」和「中英对照」"

@@ -207,7 +207,7 @@
       h("p", {
         class: "bl-hint",
         text: "1. 整篇翻译 + 左右对照：打开一篇 PDF，点阅读器右上角的「中译」悬浮按钮，"
-          + "或者按 Ctrl+Alt+T（macOS 为 Cmd+Option+T）。右侧会弹出中文译文栏。",
+          + "或者按 Ctrl+Alt+T。右侧会弹出中文译文栏。",
       }),
       h("p", {
         class: "bl-hint",

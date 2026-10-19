@@ -856,7 +856,7 @@ Bilingual.main = (() => {
 
   /* ----------------------------- 快捷键 ----------------------------- */
 
-  const HOTKEY_TEXT = "Ctrl+Alt+T"; // macOS: Cmd+Option+T
+  const HOTKEY_TEXT = "Ctrl+Alt+T"; // 本项目只在 Windows 上验证；Cmd+Option+T 的分支保留但未测过
 
   function isEditableTarget(target) {
     try {

@@ -15,8 +15,11 @@ Bilingual.exporter = (() => {
   const B = Bilingual.tools.bytes;
 
   /**
-   * 候选中文字体。TTF 优先（体积小、已验证），TTC 字体集合作为兜底
-   * （macOS 基本只有 PingFang.ttc / Songti.ttc 这类集合）。
+   * 候选中文字体。
+   *
+   * 本项目**只在 Windows 上验证过**：simfang/SimHei/Deng 这些 TTF 一定在，
+   * msyh.ttc / simsun.ttc 作为 TTC 的兜底（也实测过）。
+   * 下面 macOS / Linux 那几条只是顺手留的，没在真机上验证过。
    */
   const FONT_CANDIDATES = [
     "C:\\Windows\\Fonts\\simfang.ttf", // 仿宋
@@ -26,7 +29,7 @@ Bilingual.exporter = (() => {
     "C:\\Windows\\Fonts\\STSONG.TTF", // 华文宋体
     "C:\\Windows\\Fonts\\msyh.ttc", // 微软雅黑（TTC）
     "C:\\Windows\\Fonts\\simsun.ttc", // 宋体（TTC）
-    "/System/Library/Fonts/PingFang.ttc", // macOS
+    "/System/Library/Fonts/PingFang.ttc", // 以下 macOS/Linux 均未验证
     "/System/Library/Fonts/Supplemental/Songti.ttc",
     "/System/Library/Fonts/Hiragino Sans GB.ttc",
     "/Library/Fonts/Arial Unicode.ttf",
