@@ -1,0 +1,21 @@
+# 依赖
+node_modules/
+
+# 构建产物（xpi 走 GitHub Releases，不进仓库）
+build/
+dist/*.xpi
+dist/*.zip
+
+# 本地临时文件
+*.log
+*.out.txt
+*.tmp
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 反向工程用的参考资料（本地留档，不发布）
+recon/
