@@ -130,8 +130,17 @@ step(2, "把占位地址换成真实地址");
   entry.version = version;
   entry.update_link = `https://github.com/${ownerRepo}/releases/download/v${version}`
     + `/bilingual-reader_${version}.xpi`;
+  // ⚠️ 版本范围也要跟着 manifest 走：这块如果忘了同步，
+  // update.json 里会一直留着模板里的 7.0，Zotero 就会以为新版本还兼容 7/8。
+  entry.applications = entry.applications || {};
+  entry.applications.zotero = {
+    ...(entry.applications.zotero || {}),
+    strict_min_version: mf.applications.zotero.strict_min_version,
+    strict_max_version: mf.applications.zotero.strict_max_version,
+  };
   writeFileSync(upPath, `${JSON.stringify(up, null, 2)}\n`, "utf8");
-  ok(`update.json 指向 v${version}`);
+  ok(`update.json 指向 v${version}`
+    + `（Zotero ${entry.applications.zotero.strict_min_version} ~ ${entry.applications.zotero.strict_max_version}）`);
 }
 
 /* ------------------------------ 3. 构建 ------------------------------ */

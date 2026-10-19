@@ -1,10 +1,15 @@
-"""发布后验收：仓库页、README 图片、update.json、Release 里的 xpi，以及 xpi 里的 update_url。
+"""发布验收：范围声明、作者、下载链路、自动更新。
 
-⚠️ raw.githubusercontent.com 在国内 DNS 解析失败，所以仓库文件走 jsDelivr 验。
+只测**最终对外的那几个地址**：
+  - 仓库页 / Release 页（github.com）
+  - 最新 Release 附件里的 update.json（自动更新地址）
+  - 该 update.json 指向的 xpi
+  - jsDelivr 上按版本命名的镜像 xpi
+刻意不测 cdn.jsdelivr.net/...@main/*：那个有 12 小时缓存，测了只会误导。
 """
+
 import io
 import json
-import re
 import ssl
 import urllib.error
 import urllib.request
@@ -12,10 +17,9 @@ import zipfile
 
 OWNER = "ChanceZhangcr"
 REPO = "zotero-bilingual-reader"
-VER = "1.4.1"
 BASE = f"https://github.com/{OWNER}/{REPO}"
-# jsDelivr 的 gh 通道：读同一个仓库的同一个文件，国内可直连
-RAW = f"https://cdn.jsdelivr.net/gh/{OWNER}/{REPO}@main"
+LATEST_UPDATE = f"{BASE}/releases/latest/download/update.json"
+JSDELIVR = f"https://cdn.jsdelivr.net/gh/{OWNER}/{REPO}@main"
 
 CTX = ssl.create_default_context()
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36"
@@ -34,82 +38,64 @@ def check(label, ok, detail=""):
     print(f"[{'OK  ' if ok else 'FAIL'}] {label}{('  ' + detail) if detail else ''}")
     if not ok:
         fails += 1
-    return ok
 
 
-print("=== 1. 页面可访问 ===")
-for label, url in [("仓库首页", BASE), ("Release 页", f"{BASE}/releases/tag/v{VER}")]:
-    try:
-        status, ctype, body = get(url)
-        check(label, status == 200, f"{status} {len(body)} B")
-    except Exception as e:
-        check(label, False, str(e)[:70])
-
-print("\n=== 2. 仓库文件（走 jsDelivr）===")
-for label, path in [
-    ("README.md", "README.md"),
-    ("update.json", "update.json"),
-    ("CHANGELOG.md", "CHANGELOG.md"),
-    ("LICENSE", "LICENSE"),
-    ("效果图 reader-layout.png", "docs/reader-layout.png"),
-    ("效果图 export-bilingual.png", "docs/export-bilingual.png"),
-    ("效果图 export-zh.png", "docs/export-zh.png"),
-]:
-    try:
-        status, ctype, body = get(f"{RAW}/{path}")
-        check(label, status == 200 and len(body) > 300, f"{len(body)} B")
-    except urllib.error.HTTPError as e:
-        check(label, False, f"HTTP {e.code}（jsDelivr 缓存没跟上？等 1-2 分钟再试）")
-    except Exception as e:
-        check(label, False, str(e)[:70])
-
-print("\n=== 3. update.json 内容 ===")
+print("=== 1. 自动更新链路（Zotero 会请求的那个地址）===")
+expected = None
 try:
-    _, _, body = get(f"{RAW}/update.json")
+    _, _, body = get(LATEST_UPDATE)
     up = json.loads(body)
-    entry = up["addons"]["bilingual-reader@local.plugin"]["updates"][0]
-    print(f"  version     = {entry['version']}")
-    print(f"  update_link = {entry['update_link']}")
-    check("版本号正确", entry["version"] == VER)
-    check("下载链接指向本版本", f"/v{VER}/" in entry["update_link"])
-except Exception as e:
-    check("update.json 可解析", False, str(e)[:80])
+    e = up["addons"]["bilingual-reader@local.plugin"]["updates"][0]
+    expected = e["version"]
+    print(f"  update.json 声明版本 = {expected}")
+    print(f"  update_link         = {e['update_link']}")
+    apps = e.get("applications", {}).get("zotero", {})
+    print(f"  zotero 版本要求      = {apps}")
+    check("最低版本 9.0（不再声称支持 7/8）", apps.get("strict_min_version") == "9.0")
+    check("下载链接指向本版本", f"/v{expected}/" in e["update_link"])
+except Exception as ex:
+    check("拉 update.json", False, f"{type(ex).__name__}: {ex}")
 
-print("\n=== 4. Release 里的 xpi ===")
-xpi_url = f"{BASE}/releases/download/v{VER}/bilingual-reader_{VER}.xpi"
-try:
-    status, ctype, blob = get(xpi_url)
-    check("xpi 可下载", status == 200 and len(blob) > 50000, f"{len(blob)} B, {ctype}")
-    check("是合法 zip", blob[:4] == b"PK\x03\x04", repr(blob[:4]))
-    zf = zipfile.ZipFile(io.BytesIO(blob))
-    names = zf.namelist()
-    check("包含 manifest.json", "manifest.json" in names, ", ".join(names[:3]))
-    mf = json.loads(zf.read("manifest.json"))
-    check("版本号是 " + VER, mf["version"] == VER, mf["version"])
-    upd = mf["applications"]["zotero"]["update_url"]
-    print(f"  update_url  = {upd}")
-    check("update_url 不是被墙的 raw.githubusercontent.com", "raw.githubusercontent.com" not in upd)
-    check("update_url 指向 jsDelivr", "cdn.jsdelivr.net" in upd)
-    check("manifest 里三个必填字段齐全",
-          all(k in mf["applications"]["zotero"] for k in ("id", "update_url", "strict_max_version")))
-    check("bootstrap.js 在包里", "bootstrap.js" in names)
-    check("主脚本在包里", "chrome/content/scripts/bilingual.js" in names)
-except Exception as e:
-    check("xpi 检查", False, f"{type(e).__name__}: {e}")
+print("\n=== 2. 最新 xpi（顺着 update_link 下）===")
+if expected:
+    try:
+        url = f"{BASE}/releases/download/v{expected}/bilingual-reader_{expected}.xpi"
+        _, ctype, blob = get(url)
+        check("可下载", len(blob) > 50000, f"{len(blob)} B {ctype}")
+        check("是合法 zip", blob[:4] == b"PK\x03\x04")
+        zf = zipfile.ZipFile(io.BytesIO(blob))
+        names = zf.namelist()
+        mf = json.loads(zf.read("manifest.json"))
+        z = mf["applications"]["zotero"]
+        check(f"version = {expected}", mf["version"] == expected, mf["version"])
+        check("strict_min_version = 9.0", z["strict_min_version"] == "9.0", z["strict_min_version"])
+        check("描述写明 Zotero 9 (Windows)", "Zotero 9" in mf["description"], mf["description"][:44] + "…")
+        check("author 是两个人", "ChanceZhangcr" in mf["author"] and "DeepSeek" in mf["author"], mf["author"])
+        check("update_url 用 releases/latest（无长缓存）",
+              "/releases/latest/download/update.json" in z["update_url"], z["update_url"])
+        check("没有用被墙的 raw.githubusercontent", "raw.githubusercontent" not in z["update_url"])
+        check("三个必填字段齐全", all(k in z for k in ("id", "update_url", "strict_max_version")))
+        check("bootstrap.js + 主脚本都在", "bootstrap.js" in names and "chrome/content/scripts/bilingual.js" in names)
+    except Exception as ex:
+        check("检查 xpi", False, f"{type(ex).__name__}: {ex}")
 
-print("\n=== 5. README 里引用的图片都在仓库里 ===")
-try:
-    _, _, body = get(f"{RAW}/README.md")
-    readme = body.decode("utf-8")
-    refs = sorted(set(re.findall(r'(?:src="|!\[[^\]]*\]\()(docs/[^")]+)', readme)))
-    for rel in refs:
-        try:
-            status, _, b = get(f"{RAW}/{rel}")
-            check(f"  {rel}", status == 200 and len(b) > 1000, f"{len(b)} B")
-        except Exception as e:
-            check(f"  {rel}", False, str(e)[:60])
-    check("README 至少引用了 3 张图", len(refs) >= 3, f"{len(refs)} 张")
-except Exception as e:
-    check("README 图片检查", False, str(e)[:80])
+print("\n=== 3. jsDelivr 镜像（按版本命名，新路径无缓存）===")
+if expected:
+    try:
+        _, ctype, blob = get(f"{JSDELIVR}/releases/bilingual-reader_{expected}.xpi")
+        mf = json.loads(zipfile.ZipFile(io.BytesIO(blob)).read("manifest.json"))
+        check("镜像可下载且版本一致", mf["version"] == expected, f"{len(blob)} B, v{mf['version']}")
+    except urllib.error.HTTPError as ex:
+        check("镜像 xpi", False, f"HTTP {ex.code}（新路径一般不会有缓存，稍等再试）")
+    except Exception as ex:
+        check("镜像 xpi", False, f"{type(ex).__name__}: {ex}")
+
+print("\n=== 4. 页面 ===")
+for label, url in [("仓库首页", BASE), ("最新 Release 页", f"{BASE}/releases/latest")]:
+    try:
+        status, _, body = get(url)
+        check(label, status == 200, f"{len(body)} B")
+    except Exception as ex:
+        check(label, False, str(ex)[:70])
 
 print(f"\n{'✅ 发布验收全部通过' if fails == 0 else f'❌ {fails} 项有问题'}")
