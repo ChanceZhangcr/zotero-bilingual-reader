@@ -113,7 +113,10 @@ step(2, "把占位地址换成真实地址");
   const mfPath = join(ROOT, "src", "manifest.json");
   const mf = JSON.parse(readFileSync(mfPath, "utf8"));
   mf.homepage_url = repoUrl;
-  mf.applications.zotero.update_url = `https://raw.githubusercontent.com/${ownerRepo}/main/update.json`;
+  // ⚠️ 不用 raw.githubusercontent.com：这个域名在国内**DNS 解析失败**（实测），
+  // 用它的话 Zotero 拉 update.json 会静默失败，老用户永远收不到更新提示。
+  // jsDelivr 的 gh 通道读同一个仓库、同一个文件，实测国内直连可用。
+  mf.applications.zotero.update_url = `https://cdn.jsdelivr.net/gh/${ownerRepo}@main/update.json`;
   writeFileSync(mfPath, `${JSON.stringify(mf, null, 2)}\n`, "utf8");
   ok(`homepage_url → ${repoUrl}`);
   ok(`update_url   → ${mf.applications.zotero.update_url}`);
