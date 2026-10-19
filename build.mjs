@@ -68,7 +68,7 @@ const xpiName = `${safeName}_${version}.xpi`;
 
 log(`\n=== 构建 ${manifest.name} v${version} ===`);
 
-// 发布前提醒：update_url / homepage_url 还是占位地址的话，老用户收不到更新
+// 发布前提醒：update_url 是几个"看起来能用、其实会静默失效"的地址时，明确拦一下
 {
   const placeholder = /github\.com\/local\/|YOUR_NAME|githubusercontent\.com\/local\//;
   const fields = [
@@ -80,6 +80,16 @@ log(`\n=== 构建 ${manifest.name} v${version} ===`);
       log(`⚠️  ${label} 还是占位地址：${value}`);
       log("    真要发布的话先改成你自己的 GitHub 仓库（见 发布到GitHub.md）");
     }
+  }
+  const upd = String(manifest.applications?.zotero?.update_url || "");
+  if (upd.includes("raw.githubusercontent.com")) {
+    log("❌ update_url 用了 raw.githubusercontent.com —— 这个域名国内 DNS 解析失败，");
+    log("   老用户会永远收不到更新提示（而且不报错）。改用");
+    log("   https://github.com/<用户名>/<仓库>/releases/latest/download/update.json");
+  }
+  if (/cdn\.jsdelivr\.net\/gh\/[^@]+@main\//.test(upd)) {
+    log("⚠️  update_url 用了 jsDelivr 的 @main 地址：能通，但有 12 小时缓存，");
+    log("   新版本要等半天才被看到（官方 purge 接口对分支地址实测刷不掉）。");
   }
 }
 log(`插件 ID: ${addonId}`);

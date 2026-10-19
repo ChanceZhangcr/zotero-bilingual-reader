@@ -236,17 +236,19 @@ build.mjs             构建脚本（语法检查 → 引用检查 → 打 zip�
 node tools/publish-github.mjs
 ```
 
-它会：填好 `update_url` → 构建 xpi → 提交 → 推送 → 发 Release → 更新 jsDelivr 镜像。
+它会：填好 `update_url` → 构建 xpi → 提交 → 推送 → 发 Release（xpi + update.json 两个附件）→ 更新镜像。
 手动做的话是这几步：
 
 1. 改 `src/manifest.json` 的 `version`
 2. `node build.mjs` → 得到 `build/bilingual-reader_x.y.z.xpi`
-3. 在 GitHub 建一个 Release，tag 用 `vx.y.z`，把 `.xpi` 传上去
+3. 在 GitHub 建一个 Release，tag 用 `vx.y.z`，把 `.xpi` **和 `update.json`** 都传上去
 4. 把 xpi 再复制到 `releases/` 目录（jsDelivr 镜像走这里）
-5. 更新根目录 `update.json` 里的 `version` 和 `update_link`
 
-> ⚠️ `update_url` **不要**用 `raw.githubusercontent.com` —— 这个域名在国内 DNS 解析失败（实测），
-> 用了之后老用户永远收不到更新提示，而且不会报错。现在用的是 jsDelivr。
+> ⚠️ `update_url` 只用
+> `https://github.com/<用户名>/<仓库>/releases/latest/download/update.json`。
+> 另外两个常见写法都有坑，`build.mjs` 会直接警告你：
+> - `raw.githubusercontent.com` —— **国内 DNS 解析失败**，自动更新静默失效
+> - `cdn.jsdelivr.net/...@main` —— 能通，但有 **12 小时缓存**（purge 也刷不掉），新版本要等半天
 
 ## 许可
 

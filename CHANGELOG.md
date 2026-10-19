@@ -2,6 +2,16 @@
 
 版本号按「第几位改了会让人重新认识这个插件」来走，不严格套语义化版本。
 
+## 1.4.3
+
+- **修**：自动更新的地址换成「最新 Release 的附件」
+  （`https://github.com/…/releases/latest/download/update.json`）。
+  之前的两个地址都有坑：`raw.githubusercontent.com` 国内 DNS 解析失败；
+  `cdn.jsdelivr.net/...@main` 能通但有 **12 小时缓存**，新版本要等半天才被看到，
+  而且 jsDelivr 官方的 purge 接口对分支地址实测刷不掉
+- **改**：`build.mjs` 在这两种地址出现时直接警告/报错，防止再踩
+- **改**：发布脚本顺带把 `update.json` 作为 Release 附件上传（上面那个地址就指向它）
+
 ## 1.4.2
 
 - **改**：明确适用范围 —— **只支持 Zotero 9 + Windows**。`strict_min_version` 从 7.0 提到 9.0，

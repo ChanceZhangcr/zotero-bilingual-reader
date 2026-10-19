@@ -3,8 +3,8 @@
     "bilingual-reader@local.plugin": {
       "updates": [
         {
-          "version": "1.4.2",
-          "update_link": "https://github.com/ChanceZhangcr/zotero-bilingual-reader/releases/download/v1.4.2/bilingual-reader_1.4.2.xpi",
+          "version": "1.4.3",
+          "update_link": "https://github.com/ChanceZhangcr/zotero-bilingual-reader/releases/download/v1.4.3/bilingual-reader_1.4.3.xpi",
           "applications": {
             "zotero": {
               "strict_min_version": "7.0",

@@ -113,10 +113,12 @@ step(2, "把占位地址换成真实地址");
   const mfPath = join(ROOT, "src", "manifest.json");
   const mf = JSON.parse(readFileSync(mfPath, "utf8"));
   mf.homepage_url = repoUrl;
-  // ⚠️ 不用 raw.githubusercontent.com：这个域名在国内**DNS 解析失败**（实测），
-  // 用它的话 Zotero 拉 update.json 会静默失败，老用户永远收不到更新提示。
-  // jsDelivr 的 gh 通道读同一个仓库、同一个文件，实测国内直连可用。
-  mf.applications.zotero.update_url = `https://cdn.jsdelivr.net/gh/${ownerRepo}@main/update.json`;
+  // ⚠️ update.json 这个地址踩过两个坑，别再改回去：
+  //   1. raw.githubusercontent.com —— 国内 **DNS 解析失败**，自动更新静默失效
+  //   2. cdn.jsdelivr.net/...@main —— 能通，但对分支地址有 **12 小时缓存**，
+  //      新版本要等半天才被看到，而且官方的 purge 接口对分支地址实测刷不掉
+  // 现在用「最新 Release 的附件」地址：永远指向最新一版，没有任何缓存。
+  mf.applications.zotero.update_url = `${repoUrl}/releases/latest/download/update.json`;
   writeFileSync(mfPath, `${JSON.stringify(mf, null, 2)}\n`, "utf8");
   ok(`homepage_url → ${repoUrl}`);
   ok(`update_url   → ${mf.applications.zotero.update_url}`);
@@ -244,8 +246,7 @@ else {
 
 /* ---------------------------- 6. 发 Release ---------------------------- */
 
-step(6, `发 Release v${version} 并上传 xpi`);
-const notesPath = join(mkdtempSync(join(tmpdir(), "release-")), "notes.md");
+step(6, `发 Release v${version} 并上传 xpi`);const notesPath = join(mkdtempSync(join(tmpdir(), "release-")), "notes.md");
 {
   const changelog = readFileSync(join(ROOT, "CHANGELOG.md"), "utf8");
   const re = new RegExp(`## ${version.replace(/\./g, "\\.")}[\\s\\S]*?(?=\\n## |$)`);
@@ -281,16 +282,18 @@ if (DRY) {
 }
 else if (!releaseExists) {
   gh(["release", "create", `v${version}`, xpiAbs,
+    join(ROOT, "update.json"),
     "--repo", ownerRepo,
     "--title", `v${version}`,
     "--notes-file", notesPath,
     "--latest"]);
-  ok(`已发布 v${version}`);
+  ok(`已发布 v${version}（含 xpi 与 update.json 两个附件）`);
 }
 else {
-  warn(`v${version} 的 Release 已存在，改为覆盖上传 xpi`);
-  gh(["release", "upload", `v${version}`, xpiAbs, "--repo", ownerRepo, "--clobber"]);
-  ok("xpi 已更新");
+  warn(`v${version} 的 Release 已存在，改为覆盖上传`);
+  gh(["release", "upload", `v${version}`, xpiAbs, join(ROOT, "update.json"),
+    "--repo", ownerRepo, "--clobber"]);
+  ok("xpi 与 update.json 已更新");
 }
 
 rmSync(dirname(notesPath), { recursive: true, force: true });
@@ -301,5 +304,6 @@ console.log(`\n🎉 发布完成\n`);
 console.log(`   仓库页面：${repoUrl}`);
 console.log(`   Release ：${repoUrl}/releases/tag/v${version}`);
 console.log(`   xpi 直链：${repoUrl}/releases/download/v${version}/bilingual-reader_${version}.xpi`);
-console.log(`   自动更新：https://raw.githubusercontent.com/${ownerRepo}/main/update.json`);
+console.log(`   xpi 镜像：https://cdn.jsdelivr.net/gh/${ownerRepo}@main/releases/bilingual-reader_${version}.xpi`);
+console.log(`   自动更新：${repoUrl}/releases/latest/download/update.json`);
 console.log(`\n   把「仓库页面」这个链接发给朋友就行。\n`);

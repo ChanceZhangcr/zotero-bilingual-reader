@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Bilingual Paper Reader (双语论文助手)",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Zotero 9 (Windows)：一键把英文论文翻译成中文（4 个免密钥引擎，国内直连），左右对照阅读；可导出「中文版 + 中英对照版」PDF。",
   "homepage_url": "https://github.com/ChanceZhangcr/zotero-bilingual-reader",
   "author": "ChanceZhangcr & DeepSeek",
@@ -12,7 +12,7 @@
   "applications": {
     "zotero": {
       "id": "bilingual-reader@local.plugin",
-      "update_url": "https://cdn.jsdelivr.net/gh/ChanceZhangcr/zotero-bilingual-reader@main/update.json",
+      "update_url": "https://github.com/ChanceZhangcr/zotero-bilingual-reader/releases/latest/download/update.json",
       "strict_min_version": "9.0",
       "strict_max_version": "9.9.*"
     }
